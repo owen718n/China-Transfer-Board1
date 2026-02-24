@@ -632,7 +632,7 @@
 
       const pct = hit.pct || 0;
       const pctText = ((pct*100) < 1 ? (pct*100).toFixed(1) : (pct*100).toFixed(0)) + "%";
-      const valText = (meta.valueFmt === "money") ? moneyText(hit.val) : String(hit.val ?? 0);
+      const valText = (m.valueFmt === "money") ? moneyText(hit.val) : String(hit.val ?? 0);
 
       tip.innerHTML = `<div style="display:flex;gap:8px;align-items:center;">
           <span style="width:10px;height:10px;border-radius:3px;background:${hit.color};display:inline-block;"></span>
@@ -1106,6 +1106,8 @@
       }
     }
 
+    bindDonutHover(canvas, {cx, cy, inner, outer, segs, valueFmt: opts.valueFmt || "money"});
+
     if(legendEl){
       legendEl.innerHTML = dataRows.map(d=>{
         return `<div class="row"><div class="left"><span class="sw" style="background:${d.color}"></span><span class="name">${d.name}</span></div></div>`;
@@ -1141,11 +1143,12 @@
     }
 
     const mainData = cats.map(c=>({name:c.name, key:c.key, val:sums[c.key], color:c.color}));
-    drawDonut(mainCanvas, legend, mainData, {centerTitle: t.weighted, showPercent:true});
+    drawDonut(mainCanvas, legend, mainData, {centerTitle: t.weighted, showPercent:true, valueFmt:"money"});
 
-    // children
+    // children (sorted by Weight desc)
     childWrap.innerHTML = "";
-    for(const r of MODEL_TABLE){
+    const sortedModels = [...MODEL_TABLE].sort((a,b)=> (Number(b.Weight)||0) - (Number(a.Weight)||0));
+    for(const r of sortedModels){
       const card = document.createElement("div");
       card.className = "modelChildCard";
       const title = document.createElement("div");
@@ -1163,7 +1166,8 @@
         centerPrimary: (wPct<1 ? wPct.toFixed(1) : wPct.toFixed(0)) + "%",
         centerSecondary: "Weight",
         showPercent:true,
-        minLabelPct:0.01
+        minLabelPct:0.01,
+        valueFmt:"money"
       });
     }
   }
