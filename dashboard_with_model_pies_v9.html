@@ -876,8 +876,27 @@
     ctx.clearRect(0,0,w,h);
 
     const cx = w/2, cy = h/2 + 1;
+
+    // Estimate width budget for tiny-slice labels first, so labels can stay outside the donut.
+    let maxSmallLabelW = 0;
+    if(opts.showPercent && total>0){
+      ctx.save();
+      ctx.font = "700 10px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+      for(const d of dataRows){
+        const v = Math.max(0, Number(d.val)||0);
+        const pct = total>0 ? v/total : 0;
+        if(v<=0 || pct >= (opts.smallPct ?? 0.03)) continue;
+        const pctText = ((pct*100) < 1 ? (pct*100).toFixed(1) : (pct*100).toFixed(0)) + "%";
+        maxSmallLabelW = Math.max(maxSmallLabelW, ctx.measureText(pctText).width + 12);
+      }
+      ctx.restore();
+    }
+
     // Keep some breathing room around the ring so tiny-slice labels can stay readable.
-    const outer = Math.min(w,h)*(opts.showPercent ? 0.43 : 0.47);
+    const baseOuter = Math.min(w,h)*(opts.showPercent ? 0.43 : 0.47);
+    const labelOuterGap = opts.labelOuterGap ?? 10;
+    const sideReserved = maxSmallLabelW > 0 ? (maxSmallLabelW + labelOuterGap + 10) : 0;
+    const outer = Math.max(44, Math.min(baseOuter, (w/2) - sideReserved - 2, (h/2) - 4));
     const inner = outer*0.66;
 
     // ring bg
@@ -1007,7 +1026,10 @@
 
       function drawOne(it){
         const dir = it.dir;
-        const x3 = it.x2 + dir * 8;
+        const safeGap = opts.labelOuterGap ?? 10;
+        const rightBound = cx + outer + safeGap;
+        const leftBound = cx - outer - safeGap;
+        const x3 = dir>0 ? Math.max(it.x2 + 8, rightBound) : Math.min(it.x2 - 8, leftBound);
 
         // pill box, clamped into canvas
         const bw = it.bw, bh = pillH;
@@ -1016,6 +1038,12 @@
 
         // clamp inside canvas so it never gets cut off
         bx = Math.max(2, Math.min(bx, w - bw - 2));
+        // hard constraint: label box must stay outside donut
+        if(dir>0){
+          bx = Math.max(bx, rightBound);
+        }else{
+          bx = Math.min(bx, leftBound - bw);
+        }
         by = Math.max(2, Math.min(by, h - bh - 2));
 
         // connector line from slice to its own label to make mapping obvious
