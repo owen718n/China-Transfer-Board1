@@ -876,7 +876,8 @@
     ctx.clearRect(0,0,w,h);
 
     const cx = w/2, cy = h/2 + 1;
-    const outer = Math.min(w,h)*0.47;
+    // Keep some breathing room around the ring so tiny-slice labels can stay readable.
+    const outer = Math.min(w,h)*(opts.showPercent ? 0.43 : 0.47);
     const inner = outer*0.66;
 
     // ring bg
@@ -924,7 +925,13 @@
           const x2 = cx + Math.cos(mid) * r2;
           const y2 = cy + Math.sin(mid) * r2;
           const dir = Math.cos(mid) >= 0 ? 1 : -1;
-          smallLabels.push({ pctText, x1, y1, x2, y2, dir });
+          smallLabels.push({
+            name: d.name,
+            color: d.color || "#94a3b8",
+            pctText,
+            labelText: `${d.name} ${pctText}`,
+            x1, y1, x2, y2, dir
+          });
         }else{
           // normal slices: label inside the ring
           const r = (inner + outer) / 2;
@@ -949,11 +956,11 @@
     if(opts.showPercent && smallLabels.length){
       const ctx = canvas.getContext("2d"); // already scaled by dpr above
       ctx.save();
-      ctx.font = "800 10px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+      ctx.font = "700 10px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
       ctx.textBaseline = "middle";
-      const padX=5, padY=3;
+      const padX=6, padY=3;
       const pillH = 12 + padY*2;
-      const gap = opts.labelGap ?? 14;
+      const gap = opts.labelGap ?? Math.max(14, pillH + 3);
 
       const groups = {
         right: smallLabels.filter(d=>d.dir>0).sort((a,b)=>a.y2-b.y2),
@@ -964,7 +971,7 @@
         if(!list.length) return;
         // measure widths once
         for(const it of list){
-          it.tw = ctx.measureText(it.pctText).width;
+          it.tw = ctx.measureText(it.labelText).width;
           it.bw = it.tw + padX*2;
         }
         // initial y is y2
@@ -1011,6 +1018,17 @@
         bx = Math.max(2, Math.min(bx, w - bw - 2));
         by = Math.max(2, Math.min(by, h - bh - 2));
 
+        // connector line from slice to its own label to make mapping obvious
+        ctx.save();
+        ctx.strokeStyle = it.color;
+        ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        ctx.moveTo(it.x1, it.y1);
+        ctx.lineTo(it.x2, it.y2);
+        ctx.lineTo(dir>0 ? bx : (bx+bw), it.y);
+        ctx.stroke();
+        ctx.restore();
+
         ctx.save();
         ctx.shadowColor = "rgba(2,6,23,.18)";
         ctx.shadowBlur = 6;
@@ -1030,7 +1048,7 @@
         ctx.shadowBlur = 0;
         ctx.fillStyle = "rgba(15,23,42,.85)";
         ctx.textAlign = dir>0 ? "left" : "right";
-        ctx.fillText(it.pctText, dir>0 ? (bx+padX) : (bx+bw-padX), it.y);
+        ctx.fillText(it.labelText, dir>0 ? (bx+padX) : (bx+bw-padX), it.y);
         ctx.restore();
       }
 
