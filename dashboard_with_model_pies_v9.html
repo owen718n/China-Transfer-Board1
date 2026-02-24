@@ -916,6 +916,11 @@
       // percent label
       if(opts.showPercent && total>0){
         const pct = v/total;
+        const minLabelPct = opts.minLabelPct ?? 0;
+        if(pct < minLabelPct){
+          start += ang;
+          continue;
+        }
         const mid = start + ang/2;
         const pctText = ((pct*100) < 1 ? (pct*100).toFixed(1) : (pct*100).toFixed(0)) + "%";
         // small slices can optionally render as outer labels; default stays inside the donut
@@ -1154,7 +1159,12 @@
 
       const childData = cats.map(c=>({name:c.name, key:c.key, val:Number(r[c.key])||0, color:c.color}));
       const wPct = (Number(r.Weight)||0) * 100;
-      drawDonut(cv, null, childData, {centerPrimary: (wPct<1 ? wPct.toFixed(1) : wPct.toFixed(0)) + "%", centerSecondary: "Weight", showPercent:true});
+      drawDonut(cv, null, childData, {
+        centerPrimary: (wPct<1 ? wPct.toFixed(1) : wPct.toFixed(0)) + "%",
+        centerSecondary: "Weight",
+        showPercent:true,
+        minLabelPct:0.01
+      });
     }
   }
 
