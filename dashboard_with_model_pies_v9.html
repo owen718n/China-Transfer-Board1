@@ -889,6 +889,7 @@
 
     let start = -Math.PI/2;
     const smallLabels = [];
+    const useOuterSmallLabels = Boolean(opts.outsideSmallLabels);
     const segs = [];
     for(const d of dataRows){
       const v = Math.max(0, Number(d.val)||0);
@@ -916,8 +917,8 @@
         const pct = v/total;
         const mid = start + ang/2;
         const pctText = ((pct*100) < 1 ? (pct*100).toFixed(1) : (pct*100).toFixed(0)) + "%";
-        // for small slices, collect labels first (we will auto-resolve collisions after drawing arcs)
-        if(pct < (opts.smallPct ?? 0.03)){
+        // small slices can optionally render as outer labels; default stays inside the donut
+        if(useOuterSmallLabels && pct < (opts.smallPct ?? 0.03)){
           const r1 = outer + 2;
           const r2 = outer + 14;
           const x1 = cx + Math.cos(mid) * r1;
@@ -933,7 +934,7 @@
             x1, y1, x2, y2, dir
           });
         }else{
-          // normal slices: label inside the ring
+          // render label inside the ring
           const r = (inner + outer) / 2;
           const x = cx + Math.cos(mid) * r;
           const y = cy + Math.sin(mid) * r;
