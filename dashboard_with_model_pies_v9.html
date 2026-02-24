@@ -889,6 +889,7 @@
 
     let start = -Math.PI/2;
     const smallLabels = [];
+    const innerPercentLabels = [];
     const useOuterSmallLabels = Boolean(opts.outsideSmallLabels);
     const segs = [];
     for(const d of dataRows){
@@ -934,10 +935,22 @@
             x1, y1, x2, y2, dir
           });
         }else{
-          // render label inside the ring
+          // render label inside the ring (drawn later so bigger percentage can cover smaller one)
           const r = (inner + outer) / 2;
           const x = cx + Math.cos(mid) * r;
           const y = cy + Math.sin(mid) * r;
+          innerPercentLabels.push({ x, y, pct, pctText });
+        }
+      }
+
+      start += ang;
+    }
+
+    // Inside percentage labels: draw from small to large so larger share stays on top when labels overlap.
+    if(opts.showPercent && innerPercentLabels.length){
+      innerPercentLabels
+        .sort((a,b)=>a.pct-b.pct)
+        .forEach(({x,y,pctText})=>{
           ctx.save();
           ctx.font = "800 11px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
           ctx.textAlign = "center";
@@ -947,10 +960,7 @@
           ctx.shadowBlur = 4;
           ctx.fillText(pctText, x, y);
           ctx.restore();
-        }
-      }
-
-      start += ang;
+        });
     }
 
     /* ===== Draw small-slice labels with simple collision-avoidance (no clipping) ===== */
