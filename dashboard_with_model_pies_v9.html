@@ -1143,7 +1143,13 @@
     }
 
     const mainData = cats.map(c=>({name:c.name, key:c.key, val:sums[c.key], color:c.color}));
-    drawDonut(mainCanvas, legend, mainData, {centerTitle: t.weighted, showPercent:true, valueFmt:"money"});
+    const weightedTotalAmount = mainData.reduce((s,d)=> s + Number(d.val||0), 0);
+    drawDonut(mainCanvas, legend, mainData, {
+      centerPrimary: "$ " + fmtMoney0(weightedTotalAmount),
+      centerSecondary: t.weighted,
+      showPercent:true,
+      valueFmt:"money"
+    });
 
     // children (sorted by Weight desc)
     childWrap.innerHTML = "";
