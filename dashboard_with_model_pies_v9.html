@@ -957,7 +957,7 @@
         .sort((a,b)=>a.pct-b.pct)
         .forEach(({x,y,pctText})=>{
           ctx.save();
-          ctx.font = "800 11px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+          ctx.font = "600 10px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
           ctx.fillStyle = "rgba(255,255,255,.92)";
@@ -972,7 +972,7 @@
     if(opts.showPercent && smallLabels.length){
       const ctx = canvas.getContext("2d"); // already scaled by dpr above
       ctx.save();
-      ctx.font = "700 10px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
+      ctx.font = "600 9px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
       ctx.textBaseline = "middle";
       const padX=6, padY=3;
       const pillH = 12 + padY*2;
