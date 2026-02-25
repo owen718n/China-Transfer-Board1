@@ -1396,13 +1396,9 @@
     const centerTop = pieMode === "amount" ? "$ " + fmtMoney0(total) : Math.round(total).toLocaleString();
     const centerBottom = pieMode === "amount" ? t.pieAmount : t.pieCount;
     const isAmountMode = pieMode === "amount";
-    ctx.fillStyle = isAmountMode ? "#0ea5e9" : "#0f172a";
+    ctx.fillStyle = "#0f172a";
     ctx.font = isAmountMode ? "800 15px ui-sans-serif, system-ui" : "700 13px ui-sans-serif, system-ui";
     ctx.textAlign = "center";
-    if(isAmountMode){
-      ctx.shadowColor = "rgba(14,165,233,.35)";
-      ctx.shadowBlur = 8;
-    }
     ctx.fillText(centerTop, cx, cy-1);
     ctx.shadowBlur = 0;
     ctx.fillStyle = "#64748b";
